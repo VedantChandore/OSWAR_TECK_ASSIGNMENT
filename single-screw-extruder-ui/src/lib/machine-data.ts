@@ -180,12 +180,7 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
 
   const feedRate = clamp(walk(easeToward(previous.feedRate, targets.feedRate, status === "Running" ? 4.4 : 10), 0, 470, status === "Running" ? 3.4 : 5, status === "Fault" ? -1.4 : 0.05), 0, 470);
 
-  const vibration = clamp(
-    walk(previous.vibration, 0.6, 5.8, status === "Fault" ? 0.7 : 0.24, faultBias * 1.2),
-    0.6,
-    5.8,
-  );
-
+  
   const uptimePercent = clamp(previous.uptimePercent + (status === "Running" ? 0.02 : status === "Idle" ? -0.01 : -0.03), 0, 100);
   const efficiencyPercent = clamp((throughput / Math.max(1, BASELINE.targetThroughput)) * 100 * (status === "Running" ? 1 : status === "Idle" ? 0.35 : 0.18), 0, 100);
   const cycleCount = previous.cycleCount + (status === "Running" && tick % 2 === 0 ? 1 : 0);
@@ -298,7 +293,6 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
       throughput,
       feedRate,
       energyConsumption,
-      vibration,
       uptimePercent,
       efficiencyPercent,
       cycleCount,
