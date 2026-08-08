@@ -176,6 +176,14 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
 
   const torque = clamp(walk(easeToward(previous.torque, targets.torque, status === "Running" ? 2 : 6), 0, 96, status === "Running" ? 1.8 : 3.8, status === "Fault" ? -0.8 : 0.05), 0, 96);
 
+  const faultBias = status === "Fault" ? 0.7 : status === "Idle" ? -0.08 : 0.16;
+
+  const vibration = clamp(
+    walk(previous.vibration, 0.6, 5.8, status === "Running" ? 0.22 : status === "Idle" ? 0.14 : 0.34, faultBias),
+    0.6,
+    5.8,
+  );
+
   const throughput = clamp(walk(easeToward(previous.throughput, targets.throughput, status === "Running" ? 5 : 12), 0, 470, status === "Running" ? 4.2 : 5.6, status === "Fault" ? -1.8 : 0.05), 0, 470);
 
   const feedRate = clamp(walk(easeToward(previous.feedRate, targets.feedRate, status === "Running" ? 4.4 : 10), 0, 470, status === "Running" ? 3.4 : 5, status === "Fault" ? -1.4 : 0.05), 0, 470);
@@ -293,6 +301,7 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
       throughput,
       feedRate,
       energyConsumption,
+      vibration,
       uptimePercent,
       efficiencyPercent,
       cycleCount,
