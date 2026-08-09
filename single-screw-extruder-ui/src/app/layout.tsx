@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { PageTransition } from "@/components/page-transition";
 import { MachineDataProvider } from "@/components/machine-data-provider";
 import { createInitialSnapshot } from "@/lib/machine-data";
 
@@ -16,7 +17,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Single Screw Extruder | Industrial Monitoring UI",
+  title: "Extruder Monitor | Industrial Monitoring UI",
   description:
     "A production-grade frontend dashboard and interactive machine canvas for a single screw extruder, powered by simulated frontend data.",
 };
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">
-        <MachineDataProvider initialSnapshot={initialSnapshot}>{children}</MachineDataProvider>
+        <MachineDataProvider initialSnapshot={initialSnapshot}>
+          <PageTransition>{children}</PageTransition>
+        </MachineDataProvider>
       </body>
     </html>
   );

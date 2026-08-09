@@ -11,13 +11,17 @@ type DriveTrendChartProps = {
 const formatNumber = (value: number, decimals: number) => value.toFixed(decimals);
 
 export function DriveTrendChart({ data }: DriveTrendChartProps) {
+  const latest = data[data.length - 1];
+
   return (
-    <Card className="overflow-hidden border-white/8">
+    <Card className="overflow-hidden border-white/8" aria-label="Drive trend chart">
       <CardHeader>
         <CardTitle className="text-sm">Drive Trend</CardTitle>
         <CardDescription>RPM, torque, and motor power together to show how the drive responds during status changes.</CardDescription>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">Values shown together as relative trend lines; the units are not directly comparable.</p>
       </CardHeader>
       <CardContent className="h-65 pb-6">
+        {latest ? <p className="sr-only">Latest drive snapshot: {formatNumber(latest.screwSpeed, 0)} RPM, {formatNumber(latest.torque, 0)} percent torque, {formatNumber(latest.motorPower, 1)} kilowatts.</p> : null}
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />

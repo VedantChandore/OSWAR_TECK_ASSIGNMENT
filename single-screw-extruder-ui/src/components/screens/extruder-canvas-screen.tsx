@@ -44,14 +44,14 @@ const pointLayout: Record<string, Pick<CanvasPoint, "side" | "node" | "order">> 
 };
 
 export function CanvasScreen() {
-  const { snapshot } = useMachineData();
+  const { liveSnapshot: snapshot, units } = useMachineData();
   const [activePointId, setActivePointId] = useState("barrel-zone-2");
 
   const points = useMemo<CanvasPoint[]>(() => {
-    return getMachinePoints(snapshot)
+    return getMachinePoints(snapshot, units)
       .map((point) => ({ ...point, ...pointLayout[point.id] }))
       .sort((left, right) => left.order - right.order);
-  }, [snapshot]);
+  }, [snapshot, units]);
 
   const activePoint = points.find((point) => point.id === activePointId) ?? points[0];
 
@@ -94,7 +94,7 @@ export function CanvasScreen() {
           </Card>
         </div>
 
-        <div className="space-y-4 xl:sticky xl:top-[9.25rem] xl:self-start">
+        <div className="space-y-4 xl:sticky xl:top-37 xl:self-start">
           <Card className="border-white/8">
             <CardHeader>
               <CardTitle className="text-lg">Selected Measurement Point</CardTitle>
@@ -202,7 +202,7 @@ function DesktopCanvasGrid({
 
   return (
     <div ref={containerRef} className="relative min-w-0 overflow-visible">
-      <div className="relative grid min-h-[760px] grid-cols-[minmax(0,clamp(200px,15vw,240px))_minmax(0,1fr)_minmax(0,clamp(200px,15vw,240px))] gap-6 overflow-visible">
+      <div className="relative grid min-h-190 grid-cols-[minmax(0,clamp(200px,15vw,240px))_minmax(0,1fr)_minmax(0,clamp(200px,15vw,240px))] gap-6 overflow-visible">
         <ConnectorLayer connectors={connectors} activePointId={activePointId} />
 
         <PointStack points={points.filter((point) => point.side === "left")} activePointId={activePointId} onPointActivate={onPointActivate} refsMap={cardRefs} />
@@ -335,8 +335,8 @@ function MachineIllustration({
   const barrelTint = temperatures[2] > 208 ? "rgba(245,158,11,0.9)" : "rgba(56,189,248,0.8)";
 
   return (
-    <div className="relative z-0 flex min-h-[820px] min-w-0 items-center justify-center overflow-visible rounded-[2rem] border border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-4">
-      <div className="relative h-full w-full max-w-[920px] overflow-visible">
+    <div className="relative z-0 flex min-h-205 min-w-0 items-center justify-center overflow-visible rounded-4xl border border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-4">
+      <div className="relative h-full w-full max-w-230 overflow-visible">
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 700" role="img" aria-label="Single screw extruder diagram">
           <defs>
             <linearGradient id="machineFloor" x1="0" x2="0" y1="0" y2="1">
@@ -513,7 +513,7 @@ function MachineIllustration({
           </button>
         ))}
 
-        <div className="pointer-events-none absolute left-1/2 top-[39%] z-0 h-[14%] w-[36%] -translate-x-1/2 rounded-[999px] bg-gradient-to-r from-transparent via-cyan-400/15 to-transparent blur-2xl animate-sweep" />
+        <div className="pointer-events-none absolute left-1/2 top-[39%] z-0 h-[14%] w-[36%] -translate-x-1/2 rounded-[999px] bg-linear-to-r from-transparent via-cyan-400/15 to-transparent blur-2xl animate-sweep" />
       </div>
     </div>
   );

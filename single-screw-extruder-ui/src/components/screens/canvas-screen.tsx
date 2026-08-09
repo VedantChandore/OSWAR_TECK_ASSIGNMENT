@@ -30,12 +30,12 @@ const pointsLayout: Record<string, Pick<CanvasPoint, "x" | "y" | "cardX" | "card
 };
 
 export function CanvasScreen() {
-  const { snapshot } = useMachineData();
+  const { liveSnapshot: snapshot, units } = useMachineData();
   const [activePointId, setActivePointId] = useState("barrel-zone-2");
 
   const points = useMemo<CanvasPoint[]>(() => {
-    return getMachinePoints(snapshot).map((point) => ({ ...point, ...pointsLayout[point.id] }));
-  }, [snapshot]);
+    return getMachinePoints(snapshot, units).map((point) => ({ ...point, ...pointsLayout[point.id] }));
+  }, [snapshot, units]);
 
   const activePoint = points.find((point) => point.id === activePointId) ?? points[0];
 
@@ -52,7 +52,7 @@ export function CanvasScreen() {
             </p>
           </CardHeader>
           <CardContent className="relative p-0">
-            <div className="relative aspect-[16/10] min-h-[620px] overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))]">
+            <div className="relative aspect-16/10 min-h-155 overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))]">
               <div className="absolute inset-0 grid-pattern opacity-25" />
               <MachineIllustration status={snapshot.status} temperatures={snapshot.barrelTemperatures} screwSpeed={snapshot.screwSpeed} meltPressure={snapshot.meltPressure} />
 
@@ -102,7 +102,7 @@ export function CanvasScreen() {
                     initial={false}
                     animate={{ opacity: isActive ? 1 : 0.68, scale: isActive ? 1.01 : 0.98 }}
                     transition={{ duration: 0.22 }}
-                    className={cn("absolute z-10 w-[240px] max-w-[40vw]", point.align === "left" ? "-translate-x-0" : "translate-x-[-100%]")}
+                    className={cn("absolute z-10 w-60 max-w-[40vw]", point.align === "left" ? "translate-x-0" : "-translate-x-full")}
                     style={{ left: `${point.cardX}%`, top: `${point.cardY}%` }}
                   >
                     <HoverPointCard point={point} active={isActive} />
@@ -110,7 +110,7 @@ export function CanvasScreen() {
                 );
               })}
 
-              <div className="pointer-events-none absolute left-1/2 top-[39%] z-0 h-[14%] w-[36%] -translate-x-1/2 rounded-[999px] bg-gradient-to-r from-transparent via-cyan-400/15 to-transparent blur-2xl animate-sweep" />
+              <div className="pointer-events-none absolute left-1/2 top-[39%] z-0 h-[14%] w-[36%] -translate-x-1/2 rounded-[999px] bg-linear-to-r from-transparent via-cyan-400/15 to-transparent blur-2xl animate-sweep" />
             </div>
           </CardContent>
         </Card>

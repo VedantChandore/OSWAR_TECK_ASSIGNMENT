@@ -1,5 +1,7 @@
 export type MachineStatus = "Running" | "Idle" | "Fault";
 
+export type UnitSystem = "metric" | "imperial";
+
 export type AlertSeverity = "info" | "warning" | "danger";
 
 export type MachineAlert = {
@@ -16,10 +18,15 @@ export type TrendPoint = {
   label: string;
   screwSpeed: number;
   barrelTemperature: number;
+  dieTemperature: number;
   meltPressure: number;
   throughput: number;
   motorPower: number;
   torque: number;
+  feedRate: number;
+  energyConsumption: number;
+  uptimePercent: number;
+  efficiencyPercent: number;
 };
 
 export type MachineSnapshot = {
@@ -80,6 +87,31 @@ const easeToward = (current: number, target: number, step: number) => {
 
 const formatValue = (value: number, decimals = 1) => value.toFixed(decimals);
 
+export const convertTemperature = (value: number, units: UnitSystem) => (units === "metric" ? value : value * 1.8 + 32);
+
+export const convertPressure = (value: number, units: UnitSystem) => (units === "metric" ? value : value * 14.5038);
+
+export const formatTemperature = (value: number, units: UnitSystem, decimals = 1) => `${convertTemperature(value, units).toFixed(decimals)}${units === "metric" ? "°C" : "°F"}`;
+
+export const formatPressure = (value: number, units: UnitSystem, decimals = 1) => `${convertPressure(value, units).toFixed(decimals)}${units === "metric" ? " bar" : " psi"}`;
+
+export const formatPercent = (value: number, decimals = 0) => `${value.toFixed(decimals)}%`;
+
+export const formatWhole = (value: number, suffix = "") => `${value.toFixed(0)}${suffix}`;
+
+export const formatMixedDelta = (current: number, previous: number, decimals = 1) => {
+  if (previous === 0) {
+    return { direction: "flat" as const, text: "0.0%" };
+  }
+
+  const change = ((current - previous) / Math.abs(previous)) * 100;
+  const direction = change > 0 ? ("up" as const) : change < 0 ? ("down" as const) : ("flat" as const);
+  return {
+    direction,
+    text: `${Math.abs(change).toFixed(decimals)}%`,
+  };
+};
+
 const driveTargets = (status: MachineStatus) =>
   status === "Running"
     ? { screwSpeed: BASELINE.screwSpeed, motorPower: BASELINE.motorPower, torque: BASELINE.torque, throughput: BASELINE.throughput, feedRate: BASELINE.feedRate }
@@ -126,10 +158,15 @@ export function createInitialSnapshot(): MachineSnapshot {
       label: `${index}`,
       screwSpeed: BASELINE.screwSpeed - (17 - index) * 0.4,
       barrelTemperature: BASELINE.barrelTemperatures[2] - (17 - index) * 0.25,
+      dieTemperature: BASELINE.dieTemperature - (17 - index) * 0.18,
       meltPressure: BASELINE.meltPressure - (17 - index) * 0.35,
       throughput: BASELINE.throughput - (17 - index) * 1.3,
       motorPower: BASELINE.motorPower - (17 - index) * 0.2,
       torque: BASELINE.torque - (17 - index) * 0.25,
+      feedRate: BASELINE.feedRate - (17 - index) * 0.8,
+      energyConsumption: BASELINE.energyConsumption - (17 - index) * 1.1,
+      uptimePercent: BASELINE.uptimePercent - (17 - index) * 0.02,
+      efficiencyPercent: BASELINE.efficiencyPercent - (17 - index) * 0.04,
     })),
   };
 }
@@ -201,10 +238,15 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
       label: formatTime(now),
       screwSpeed,
       barrelTemperature: barrelTemperatures[2],
+      dieTemperature,
       meltPressure,
       throughput,
       motorPower,
       torque,
+      feedRate,
+      energyConsumption,
+      uptimePercent,
+      efficiencyPercent,
     },
   ];
 
@@ -314,7 +356,7 @@ export function advanceSnapshot(previous: MachineSnapshot, tick: number, previou
   };
 }
 
-export function getMachinePoints(snapshot: MachineSnapshot): MachinePointValue[] {
+export function getMachinePoints(snapshot: MachineSnapshot, units: UnitSystem = "metric"): MachinePointValue[] {
   return [
     {
       id: "feeder",
@@ -340,21 +382,21 @@ export function getMachinePoints(snapshot: MachineSnapshot): MachinePointValue[]
     {
       id: "barrel-zone-1",
       label: "Barrel Zone 1",
-      value: `${snapshot.barrelTemperatures[0].toFixed(0)}°C`,
+      value: formatTemperature(snapshot.barrelTemperatures[0], units, units === "metric" ? 0 : 1),
       description: "Feed-zone thermal profile.",
       severity: snapshot.barrelTemperatures[0] > 205 ? "warning" : "info",
     },
     {
       id: "barrel-zone-2",
       label: "Barrel Zone 2",
-      value: `${snapshot.barrelTemperatures[1].toFixed(0)}°C`,
+      value: formatTemperature(snapshot.barrelTemperatures[1], units, units === "metric" ? 0 : 1),
       description: "Intermediate heating zone.",
       severity: snapshot.barrelTemperatures[1] > 208 ? "warning" : "info",
     },
     {
       id: "barrel-zone-3",
       label: "Barrel Zone 3",
-      value: `${snapshot.barrelTemperatures[2].toFixed(0)}°C`,
+      value: formatTemperature(snapshot.barrelTemperatures[2], units, units === "metric" ? 0 : 1),
       description: "Compression-zone thermal profile.",
       severity: snapshot.barrelTemperatures[2] > 210 ? "warning" : "info",
     },
@@ -368,7 +410,7 @@ export function getMachinePoints(snapshot: MachineSnapshot): MachinePointValue[]
     {
       id: "die",
       label: "Die",
-      value: `${snapshot.dieTemperature.toFixed(0)}°C / ${snapshot.meltPressure.toFixed(0)} bar`,
+      value: `${formatTemperature(snapshot.dieTemperature, units, units === "metric" ? 0 : 1)} / ${formatPressure(snapshot.meltPressure, units, units === "metric" ? 0 : 1)}`,
       description: "Final forming temperature and pressure.",
       severity: snapshot.meltPressure > 145 ? "danger" : "info",
     },

@@ -17,13 +17,16 @@ type TrendChartProps = {
 const formatNumber = (value: number, decimals: number) => value.toFixed(decimals);
 
 export function TrendChart({ title, description, data, dataKey, color, suffix, decimals = 0 }: TrendChartProps) {
+  const latest = data[data.length - 1];
+
   return (
-    <Card className="overflow-hidden border-white/8">
+    <Card className="overflow-hidden border-white/8" aria-label={`${title} trend chart`}>
       <CardHeader>
         <CardTitle className="text-sm">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="h-65 pb-6">
+        {latest ? <p className="sr-only">Latest value {formatNumber(Number(latest[dataKey] ?? 0), decimals)}{suffix ?? ""} at {latest.label}.</p> : null}
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
