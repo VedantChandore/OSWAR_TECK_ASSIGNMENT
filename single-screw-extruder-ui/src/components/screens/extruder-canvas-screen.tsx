@@ -59,7 +59,7 @@ export function CanvasScreen() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.08),transparent_30%),linear-gradient(180deg,#0d0d0d_0%,#090909_100%)]">
       <AppFrame title="Interactive Machine Canvas" subtitle="Original extruder visualization with interactive measurement points and synchronized simulated values." />
 
-      <main className="mx-auto grid w-full max-w-[1680px] gap-6 px-4 py-6 sm:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <main className="mx-auto grid w-full max-w-[1680px] gap-6 px-4 py-6 sm:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_clamp(312px,22vw,348px)]">
         <div className="space-y-6 min-w-0">
           <Card className="relative overflow-visible border-white/8 p-0">
             <CardHeader className="border-white/5">
@@ -202,7 +202,7 @@ function DesktopCanvasGrid({
 
   return (
     <div ref={containerRef} className="relative min-w-0 overflow-visible">
-      <div className="relative grid min-h-[760px] grid-cols-[minmax(230px,1fr)_minmax(620px,1.5fr)_minmax(230px,1fr)] gap-6 overflow-visible">
+      <div className="relative grid min-h-[760px] grid-cols-[minmax(0,clamp(200px,15vw,240px))_minmax(0,1fr)_minmax(0,clamp(200px,15vw,240px))] gap-6 overflow-visible">
         <ConnectorLayer connectors={connectors} activePointId={activePointId} />
 
         <PointStack points={points.filter((point) => point.side === "left")} activePointId={activePointId} onPointActivate={onPointActivate} refsMap={cardRefs} />
@@ -336,7 +336,7 @@ function MachineIllustration({
 
   return (
     <div className="relative z-0 flex min-h-[820px] min-w-0 items-center justify-center overflow-visible rounded-[2rem] border border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] p-4">
-      <div className="relative h-full w-full max-w-[1160px] overflow-visible">
+      <div className="relative h-full w-full max-w-[920px] overflow-visible">
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 700" role="img" aria-label="Single screw extruder diagram">
           <defs>
             <linearGradient id="machineFloor" x1="0" x2="0" y1="0" y2="1">
